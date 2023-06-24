@@ -47,7 +47,7 @@ class TreeNode:
         if len(self.StoredData) < self.capacity:
             #Adds data to the StoredData list and sets the square s parameter of the particle to use it with MAC
             self.StoredData.append(data)
-            data.s = np.sqrt(self.boundaries.width**2 + self.boundaries.height**2)
+            #data.s = np.sqrt(self.boundaries.width**2 + self.boundaries.height**2)
             return True
     
         if not self.divided:
@@ -135,37 +135,25 @@ class TreeNode:
         return Point(X_cm, Y_cm), TotalMass
 
     def ParticleInteraction(self, particle, G=1, theta = 0.5):
-        '''calculte all the interactions over the particle having on count the theta criterion, and returns acceleration components
+        '''Calculte all the interactions over the particle having on count the theta criterion, and returns acceleration components
         to later use it with leapfrog integration'''
         
         #initial acceleration
         ax = 0
         ay = 0
 
-        for data in self.StoredData:
-            if data.x == particle.x and data.y == particle.y:#particle does not interact with itself
-                ax += 0
-                ay += 0 
-            
-            else:
-                dx = data.x - particle.x
-                dy = data.y - particle.y
-                aux_y = abs(dx)/dx
-                aux_x = abs(dy)/dy
-                ax += aux_x*G*data.mass/dx**2
-                ay += aux_y*G*data.mass/dy**2
-
         if self.divided:
             CM, TotalMass = self.CenterOfMass()
             d = np.sqrt((CM.x-particle.x)**2+(CM.y-particle.y)**2)
+            s = np.sqrt(self.boundaries.width**2 + self.boundaries.height**2)
 
-            if particle.s/d < theta: #multipole acceptance criterion (MAC)
-                dx = CM.x - particle.x
-                dy = CM.y - particle.y
+            if s/d < theta: #multipole acceptance criterion (MAC)
+                dx = (CM.x - particle.x)
+                dy = (CM.y - particle.y)
                 aux_x = abs(dx)/dx
                 aux_y = abs(dy)/dy
-                ax += aux_x*G*TotalMass/dx**2
-                ay += aux_y*G*TotalMass/dy**2
+                ax += aux_x*G*TotalMass/(dx**2 + dy**2)
+                ay += aux_y*G*TotalMass/(dy**2 + dx**2)
 
             else:
                 if len(self.StoredData) > 0:
@@ -184,9 +172,22 @@ class TreeNode:
                 
                 else:
                     ax += 0
-                    qy+= 0
+                    ay+= 0
 
-            return ax, ay
+        for data in self.StoredData:
+            if data.x == particle.x and data.y == particle.y:#particle does not interact with itself
+                ax += 0
+                ay += 0 
+            
+            else:
+                dx = data.x - particle.x
+                dy = data.y - particle.y
+                aux_x = abs(dx)/dx
+                aux_y = abs(dy)/dy
+                ax += aux_x*G*data.mass/(dx**2 + dy**2)
+                ay += aux_y*G*data.mass/(dx**2 + dy**2)
+
+        return ax, ay
 
         # This below is a kind of brute force algorithm I wrote first, it could be addapted by replacing the sample parameter
         # and we could have a way to measure runtime, but I am not doing it yet
