@@ -1,6 +1,6 @@
 '''Defines the QuadTree class used to group data into QuadTree Tree data structure'''
 #Implemented with the aid of: https://www.youtube.com/watch?v=RKODYaueSvw
-#import numpy as np
+import numpy as np
 
 class Point:
     def __init__(self, x, y):
@@ -45,9 +45,11 @@ class TreeNode:
         
         #checks if the Node is avaliable for storing data
         if len(self.StoredData) < self.capacity:
+            #Adds data to the StoredData list and sets the square s parameter of the particle to use it with MAC
             self.StoredData.append(data)
+            data.s = np.sqrt(self.boundaries.width**2 + self.boundaries.height**2)
             return True
-        
+    
         if not self.divided:
             self.divide()
 
@@ -99,3 +101,106 @@ class TreeNode:
             self.ne.draw(ax, c = c, lw = lw, alpha = alpha)
             self.se.draw(ax, c = c, lw = lw, alpha = alpha)
             self.sw.draw(ax, c = c, lw = lw, alpha = alpha)
+
+    def SweepRegion(self):
+        data_in_region = []
+
+        for data in self.StoredData:
+            data_in_region.append(data)
+
+        if self.divided:
+            data_in_region.extend(self.nw.SweepRegion())
+            data_in_region.extend(self.ne.SweepRegion())
+            data_in_region.extend(self.se.SweepRegion())
+            data_in_region.extend(self.sw.SweepRegion())
+
+        return data_in_region
+
+    def CenterOfMass(self):
+
+        TotalMass = 0
+        XPonderate = 0
+        YPonderate = 0        
+        
+        sample = self.SweepRegion()
+
+        for data in sample:
+            TotalMass += data.mass
+            XPonderate += data.mass*data.x
+            YPonderate += data.mass*data.y
+
+        X_cm = XPonderate/TotalMass
+        Y_cm = YPonderate/TotalMass
+
+        return Point(X_cm, Y_cm), TotalMass
+
+    def ParticleInteraction(self, particle, G=1, theta = 0.5):
+        '''calculte all the interactions over the particle having on count the theta criterion, and returns acceleration components
+        to later use it with leapfrog integration'''
+        
+        #initial acceleration
+        ax = 0
+        ay = 0
+
+        for data in self.StoredData:
+            if data.x == particle.x and data.y == particle.y:#particle does not interact with itself
+                ax += 0
+                ay += 0 
+            
+            else:
+                dx = data.x - particle.x
+                dy = data.y - particle.y
+                aux_y = abs(dx)/dx
+                aux_x = abs(dy)/dy
+                ax += aux_x*G*data.mass/dx**2
+                ay += aux_y*G*data.mass/dy**2
+
+        if self.divided:
+            CM, TotalMass = self.CenterOfMass()
+            d = np.sqrt((CM.x-particle.x)**2+(CM.y-particle.y)**2)
+
+            if particle.s/d < theta: #multipole acceptance criterion (MAC)
+                dx = CM.x - particle.x
+                dy = CM.y - particle.y
+                aux_x = abs(dx)/dx
+                aux_y = abs(dy)/dy
+                ax += aux_x*G*TotalMass/dx**2
+                ay += aux_y*G*TotalMass/dy**2
+
+            else:
+                if len(self.StoredData) > 0:
+                    ax1, ay1 = self.nw.ParticleInteraction(particle)
+                    ax += ax1
+                    ay += ay1
+                    ax2, ay2 = self.ne.ParticleInteraction(particle)
+                    ax += ax2
+                    ay += ay2
+                    ax3, ay3 = self.se.ParticleInteraction(particle)
+                    ax += ax3
+                    ay += ay3
+                    ax4, ay4 = self.sw.ParticleInteraction(particle)
+                    ax += ax4
+                    ay += ay4
+                
+                else:
+                    ax += 0
+                    qy+= 0
+
+            return ax, ay
+
+        # This below is a kind of brute force algorithm I wrote first, it could be addapted by replacing the sample parameter
+        # and we could have a way to measure runtime, but I am not doing it yet
+
+        # for data in sample:
+
+        #     if data.x != particle.x and data.y != particle.y:#particle does not interact with itself
+        #         dx = data.x - particle.x
+        #         dy = data.y - particle.y
+        #         aux_y = abs(dx)/dx
+        #         aux_x = abs(dy)/dy
+        #         a.x += aux_x*G*data.mass/dx**2
+        #         a.y += aux_y*G*data.mass/dy**2
+
+        #     else:
+        #         a.x += 0
+        #         a.y += 0
