@@ -43,11 +43,10 @@ class TreeNode:
         if not self.boundaries.ContainsData(data):
             return False
         
-        #checks if the Node is avaliable for storing data
+        #checks if the node is avaliable for storing data
         if len(self.StoredData) < self.capacity:
-            #Adds data to the StoredData list and sets the square s parameter of the particle to use it with MAC
+            #Adds data to the StoredData list 
             self.StoredData.append(data)
-            #data.s = np.sqrt(self.boundaries.width**2 + self.boundaries.height**2)
             return True
     
         if not self.divided:
