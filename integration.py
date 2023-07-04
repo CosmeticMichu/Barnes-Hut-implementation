@@ -32,7 +32,7 @@ def create_particles(num_particles, xsize, ysize, seed) :
     np.random.seed(seed)
 
     while ii < num_particles:
-        mass = np.random.uniform(5E+4, 1E+5)
+        mass = np.random.uniform(1E+2, 9E+2)
         x = np.random.uniform(0, xsize)
         y = np.random.uniform(0, ysize)
         vx, vy = np.random.uniform(-10.0, 10.0, size = 2)
@@ -55,16 +55,16 @@ def build_quadtree(particles, x_size, y_size):
     return QuadTree
 
 #---------------------------------main method----------------------------------
-
+# # comment this main method and uncomment the methid below to visualiza the quadtree
 # if __name__ == '__main__':
 #     xsize, ysize = 800, 800
-#     NumOfParticles = 4
-#     tmax = 60
+#     NumOfParticles = 100
+#     tmax = 90
 #     Deltat = 0.1
 
 #     t0 = timeit.default_timer()#timeit
-#     #seed = int(1000*np.random.uniform())
-#     seed = 424#note that with this seed definition we are able to expand or reduce the number of particles holding some positions 
+#     seed = int(1000*np.random.uniform())
+#     #seed = 479#note that with this seed definition we are able to expand or reduce the number of particles holding some positions 
 #     particles = create_particles(NumOfParticles, xsize, ysize, seed)
 #     elapsed_particles = timeit.default_timer() - t0#timeit
 
@@ -91,7 +91,7 @@ def build_quadtree(particles, x_size, y_size):
 #         ax.set_xlim(xsize)
 #         ax.set_ylim(ysize)
 #         ax.set_title(f't = {t:.2f}')
-#         #print(f'iteration: {count}', flush = True)
+#         print(f"{100*count/(tmax/Deltat):.1f}% completed", end = "\r")
 #         filename = 'figures/gif_data/' + str(t) + '.png'
 #         filenames.append(filename)
 #         tree = build_quadtree(particles, xsize, ysize)
@@ -102,7 +102,6 @@ def build_quadtree(particles, x_size, y_size):
 #         #updates positions
 #         for particle in particles:
 #             particle.ax, particle.ay = tree.ParticleInteraction(particle)
-#             #print(particle.ax)
 #             particle.vx += particle.ax*Deltat
 #             particle.vy += particle.ay*Deltat
 #             particle.x += particle.vx*Deltat #+ 0.5*particle.ax*Deltat**2
@@ -116,23 +115,24 @@ def build_quadtree(particles, x_size, y_size):
 #         count += 1
 
 #     elapsed_sim = timeit.default_timer() - t0#timeit
-#     print(f'Simulation ended ({elapsed_sim}s) and aux figures were created. Creating .gif')
+#     print(f'Simulation ended ({elapsed_sim:.4f}s) and aux figures were created. Creating .gif')
 
 #     images = []
 #     for filename in filenames:
 #         images.append(imageio.imread(filename))
+#     #imageio.mimsave('figures/animation.gif', images)
 #     imageio.mimsave('figures/animation.gif', images, duration = 20)
 #     elapsed = timeit.default_timer() - t0#timeit
-#     print(f'.gif created. Work donde! ({elapsed}s)')
+#     print(f'.gif created. Work donde! ({elapsed:.4f}s)')
 
+# comment this main method and uncomment the method above to excecute the simulation
 if __name__ == '__main__':
     xsize, ysize = 800, 800
-    NumOfParticles = 10
+    NumOfParticles = 30
 
     t0_particle = timeit.default_timer()#timeit
     seed = int(1000*np.random.uniform())
-    #seed = 820
-    #note that with this seed definition we are able to expand or reduce the number of particles holding some positions 
+    #seed = 480 #note that with this seed definition we are able to expand or reduce the number of particles holding some positions 
     particles = create_particles(NumOfParticles, xsize, ysize, seed)
     elapsed_particles = timeit.default_timer() - t0_particle#timeit
 
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     tree.draw(ax, c = 'w')
 
     #draw particles
-    ax.scatter([particle.x for particle in particles],[particle.y for particle in particles], s=50, c = 'w')
+    ax.scatter([particle.x for particle in particles],[particle.y for particle in particles], s=10, c = 'w')
     ax.invert_yaxis()
     ax.invert_xaxis()
 

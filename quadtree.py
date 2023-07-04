@@ -37,53 +37,72 @@ class TreeNode:
         self.StoredData = []
         self.divided = False #checks if the current node has been already divided
 
-    def insert(self, data):
-        #checks if the data is in the boundaries (rectangle of given width and height from its corner), all the 
-        #binary values are assigned to know which QuadTree the given data below
-        if not self.boundaries.ContainsData(data):
-            return False
-        
-        #checks if the node is avaliable for storing data
-        if len(self.StoredData) < self.capacity:
-            #Adds data to the StoredData list 
-            self.StoredData.append(data)
-            return True
-    
-        if not self.divided:
-            self.divide()
-
-        if self.nw.insert(data):
-            return True
-        elif self.ne.insert(data):
-            return True
-        elif self.se.insert(data):
-            return True
-        elif self.sw.insert(data):
-            return True
-        
-        #if for any reason the point is not added to any QuadTree
-        return False
-
     def divide(self):
         x_corner = self.boundaries.corner.x
         y_corner = self.boundaries.corner.y
         new_width = 0.5*self.boundaries.width
         new_height = 0.5*self.boundaries.height
 
-        #define childs
+        #divide into childs
         nw = Rectangle(Point(x_corner, y_corner + new_height), new_width, new_height)
-        self.nw = TreeNode(nw)
+        self.nw = TreeNode(nw, self.capacity)
         
         ne = Rectangle(Point(x_corner + new_width, y_corner + new_height), new_width, new_height)
-        self.ne = TreeNode(ne)
+        self.ne = TreeNode(ne, self.capacity)
         
         se = Rectangle(Point(x_corner + new_width, y_corner), new_width, new_height)
-        self.se = TreeNode(se)
+        self.se = TreeNode(se, self.capacity)
         
         sw = Rectangle(Point(x_corner, y_corner), new_width, new_height)
-        self.sw = TreeNode(sw)
+        self.sw = TreeNode(sw, self.capacity)
         
+        #set the current node as divided
         self.divided = True
+
+    def insert(self, data):
+
+        #checks if data is contanined into the region
+        if not self.boundaries.ContainsData(data):
+            return False
+
+        #if data is in the region, checks if the current node is avaliable to store more data
+        if not self.divided and len(self.StoredData) < self.capacity:
+            self.StoredData.append(data)
+            return True
+        
+        #if the node is divided, tries to add data to one of the childrens
+        if self.divided:
+            if self.nw.insert(data):
+                return True
+            elif self.ne.insert(data):
+                return True
+            elif self.se.insert(data):
+                return True
+            elif self.sw.insert(data):
+                return True
+
+        #if the node is not avaliable to store data, divide the node into its childrens
+        if not self.divided and len(self.StoredData) >= self.capacity:
+            self.divide()
+
+            #adds the current data and all the data already contained in the node to the children nodes
+            self.StoredData.append(data)
+            for elem in self.StoredData:
+                if self.nw.insert(elem):
+                    continue
+                elif self.ne.insert(elem):
+                    continue
+                elif self.se.insert(elem):
+                    continue
+                elif self.sw.insert(elem):
+                    continue
+            
+            #clears the list of the current node
+            self.StoredData.clear()
+            return True
+
+        #this condition should never be reached
+        return False
 
     def __len__(self):
         count = len(self.StoredData)
