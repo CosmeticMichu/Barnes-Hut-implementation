@@ -69,7 +69,7 @@ class TreeNode:
         if not self.divided and len(self.StoredData) < self.capacity:
             self.StoredData.append(data)
             return True
-        
+
         #if the node is divided, tries to add data to one of the childrens
         if self.divided:
             if self.nw.insert(data):
@@ -85,7 +85,7 @@ class TreeNode:
         if not self.divided and len(self.StoredData) >= self.capacity:
             self.divide()
 
-            #adds the current data and all the data already contained in the node to the children nodes
+            #adds the current data and all the data already contained in the node, to the children nodes
             self.StoredData.append(data)
             for elem in self.StoredData:
                 if self.nw.insert(elem):
@@ -96,10 +96,9 @@ class TreeNode:
                     continue
                 elif self.sw.insert(elem):
                     continue
-            
+
             #clears the list of the current node
-            self.StoredData.clear()
-            return True
+            # self.StoredData.clear() # esto está haciendo que las particulas no interactúen
 
         #this condition should never be reached
         return False
@@ -126,11 +125,17 @@ class TreeNode:
         for data in self.StoredData:
             data_in_region.append(data)
 
+        # if self.divided:
+        #     data_in_region.extend(self.nw.SweepRegion())
+        #     data_in_region.extend(self.ne.SweepRegion())
+        #     data_in_region.extend(self.se.SweepRegion())
+        #     data_in_region.extend(self.sw.SweepRegion())
+
         if self.divided:
-            data_in_region.extend(self.nw.SweepRegion())
-            data_in_region.extend(self.ne.SweepRegion())
-            data_in_region.extend(self.se.SweepRegion())
-            data_in_region.extend(self.sw.SweepRegion())
+            data_in_region = data_in_region + self.nw.SweepRegion()
+            data_in_region = data_in_region + self.ne.SweepRegion()
+            data_in_region = data_in_region + self.sw.SweepRegion()
+            data_in_region = data_in_region + self.se.SweepRegion()
 
         return data_in_region
 
