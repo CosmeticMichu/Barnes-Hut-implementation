@@ -32,7 +32,7 @@ def create_particles(num_particles, xsize, ysize, seed) :
     np.random.seed(seed)
 
     while ii < num_particles:
-        mass = np.random.uniform(1E+2, 9E+2)
+        mass = np.random.uniform(5E+4, 1E+5)
         x = np.random.uniform(0, xsize)
         y = np.random.uniform(0, ysize)
         vx, vy = np.random.uniform(-10.0, 10.0, size = 2)
@@ -55,10 +55,10 @@ def build_quadtree(particles, x_size, y_size):
     return QuadTree
 
 #---------------------------------main method----------------------------------
-# # comment this main method and uncomment the methid below to visualiza the quadtree
+# comment this main method and uncomment the methid below to visualiza the quadtree
 if __name__ == '__main__':
     xsize, ysize = 800, 800
-    NumOfParticles = 100
+    NumOfParticles = 10
     tmax = 20
     Deltat = 0.1
 
@@ -131,8 +131,8 @@ if __name__ == '__main__':
 #     NumOfParticles = 30
 
 #     t0_particle = timeit.default_timer()#timeit
-#     seed = int(1000*np.random.uniform())
-#     #seed = 480 #note that with this seed definition we are able to expand or reduce the number of particles holding some positions 
+#     # seed = int(1000*np.random.uniform())
+#     seed = 480 #note that with this seed definition we are able to expand or reduce the number of particles holding some positions 
 #     particles = create_particles(NumOfParticles, xsize, ysize, seed)
 #     elapsed_particles = timeit.default_timer() - t0_particle#timeit
 
@@ -141,6 +141,7 @@ if __name__ == '__main__':
 #     elapsed_build_tree = timeit.default_timer() - t0_tree_build#timeit
 
 #     print(f'This sample was generated with seed = {seed}')
+#     print(f'Length of the sample: {len(tree.SweepRegion())}')
 
 #     #PLOT
 
